@@ -2,27 +2,6 @@
 
 @section('content')
 <div class="container-fluid">
-
-    <div class="row">
-        <div class="col-2">
-            <div class="row">
-                <div class="col">
-                    <h2>Categorias</h2>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col">
-                    <ul class="list-group">
-                        @foreach ($categories as $category)
-                    <a href="{{route('categories.products.show', [$category->title, $category->identifier])}}" class="list-group-item">
-                                {{$category->title}}
-                            </a>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="col">
             <div class="row">
                 <div class="col">
                     <h2 class="display-2">Products</h2>
@@ -43,7 +22,5 @@
                     </div>
                 @endforeach
             </div>
-        </div>
-    </div>
 </div>
 @endsection

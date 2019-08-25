@@ -12,6 +12,8 @@
 */
 
 Route::get('/', 'WelcomeController@showWelcomePage')->name('welcome');
+Route::get('products/{title}-{id}', 'ProductController@showProduct')->name('products.show');
+Route::get('categories/{title}-{id}/products', 'CategoryProductController@showProducts')->name('categories.products.show');
 
 Auth::routes(['register' => false, 'reset' => false]);
 
