@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\MarketService;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -41,4 +42,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [];
+
+    public function getNameAttribute()
+    {
+        $marketService = resolve(MarketService::class);
+        $userInformation = $marketService->getUserInformation();
+        return $userInformation->name;
+    }
 }

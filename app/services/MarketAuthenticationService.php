@@ -71,6 +71,67 @@ class MarketAuthenticationService
         return $tokenData;
     }
 
+    public function getPasswordToken($username, $password)
+    {
+        $formParams = [
+            'grant_type' => 'password',
+            'client_id' => $this->passwordClienteId,
+            'client_secret' => $this->passwordClienteSecret,
+            'username' => $username,
+            'password' => $password,
+            'scope' => 'purchase-product manage-products manage-account read-general'
+        ];
+        
+        $tokenData = $this->makeResquest('POST', 'oauth/token', [], $formParams);
+
+        $this->storeValidToken($tokenData, 'password');
+        
+        return $tokenData;
+    }
+
+    public function getAutenticationUserToken()
+    {
+        $user = auth()->user();
+
+        if (now()->lt($user->token_expired_at)) {
+            return $user->acces_token;
+        }
+
+        return $this->refreshAutenticatedUserToken($user);
+    }
+
+    public function refreshAutenticatedUserToken($user)
+    {
+        $clientId = $this->clientId;
+        $clientSecret = $this->clientSecret;
+
+        if ($user->grant_type === 'password') {
+            $clientId = $this->passwordClienteId;
+            $clientSecret = $this->passwordClienteSecret;
+        }
+
+        $formParams = [
+            'grant_type' => 'refresh_token',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'refresh_token' => $user->refresh_token
+        ];
+        
+        $tokenData = $this->makeResquest('POST', 'oauth/token', [], $formParams);
+
+        $this->storeValidToken($tokenData, $user->grant_type);
+        
+        $user->fill([
+            'access_token' => $tokenData->access_token,
+            'refresh_token' => $tokenData->refresh_token,
+            'token_expired_at' => $tokenData->token_expired_at
+        ]);
+
+        $user->save();
+
+        return $user->access_token;
+
+    }
     public function storeValidToken($tokenData, $grantType)
     {
         $tokenData->token_expired_at = now()->addSecond($tokenData->expires_in - 5);

@@ -10,7 +10,7 @@ trait ConsumesExternalServices
      * Enviar Request a servicios
      * @return string
      */
-    public function makeResquest($method, $requestUrl, $queryParams = [], $formParams = [], $headers = [])
+    public function makeResquest($method, $requestUrl, $queryParams = [], $formParams = [], $headers = [], $hasFile = false)
     {
         $client = new Client([
             'base_uri' => $this->baseUri,
@@ -20,9 +20,20 @@ trait ConsumesExternalServices
             $this->resolveAutorization($queryParams,$formParams,$headers);
         }
 
+        $bodyType = 'form_params';
+        if ($hasFile) {
+            $bodyType = 'multipart';
+
+            $multipart = [];
+
+            foreach ($formParams as $name => $contents) {
+                $multipart[] = ['name' => $name, 'contents' => $contents];
+            }
+        }
+
         $response = $client->request($method, $requestUrl, [
             'query' => $queryParams,
-            'form_params' => $formParams,
+            $bodyType => $hasFile ? $multipart : $formParams,
             'headers' => $headers
         ]);
 
